@@ -18,10 +18,10 @@ connectDB();
 dotenv.config({ path: "./config/config.env" });
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
-
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
