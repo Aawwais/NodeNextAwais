@@ -96,3 +96,46 @@ exports.deleteTodo = async (req, res) => {
     res.status(500).json({ message: "Error deleting todo", error: err });
   }
 };
+
+//  search
+
+exports.searchTodos = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const todos = await Todo.find({
+      title: { $regex: query, $options: "i" },
+    });
+
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error searching todos",
+      error: error.message,
+    });
+  }
+};
+
+//  pagination
+exports.getPaginatedTodos = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    const totalTodos = await Todo.countDocuments();
+    const todos = await Todo.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(totalTodos / limit),
+      totalTodos,
+      todos,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch paginated todos", error });
+  }
+};
